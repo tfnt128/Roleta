@@ -1,15 +1,33 @@
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.UI;
 
-public class UITween : Subject
+public class UITween : MonoBehaviour, IObserver
 {
-    [SerializeField]
-    private GameObject title, logo, comecarButton, comecarButtonEdge, roulette, arrow, girarButton, girarButtonEdge;
+    [SerializeField] private GameObject title,
+        logo,
+        comecarButton,
+        comecarButtonEdge,
+        roulette,
+        arrow,
+        girarButton,
+        girarButtonEdge,
+        logoColor,
+        finalMessagePos;
+
+    [SerializeField] private TextMeshProUGUI _finalMessage;
+
+    [SerializeField] private UnityEvent onRouletteButtonPressed;
+
+    [SerializeField] private RouletteWheel _rouletteSubject;
+
+    private float _exitTargetX = -1200f;
+    private float _enterTargetX = 0f;
 
     private void Start()
     {
-        NotifyObservers(ScreenState.InitialScreen);
         LeanTween.scale(title, new Vector3(1f, 1f, 1f), 2).setDelay(.5f).setEase(LeanTweenType.easeOutElastic);
 
         RawImage rawImage = logo.GetComponent<RawImage>();
@@ -23,44 +41,57 @@ public class UITween : Subject
 
     public void ComecarButton()
     {
-        NotifyObservers(ScreenState.RouletteScreen);
-        StartRouleteScreen();
+        LeanTween.cancelAll();
+        StartRouletteScreen();
     }
-
 
     public void GirarButton()
     {
+        onRouletteButtonPressed.Invoke();
+        LeanTween.cancelAll();
         List<Graphic> imagesToAnimate = GetGirarButtonImages();
-
-        LeanTween.rotateAround(roulette, Vector3.forward, -360, 2f).setLoopClamp();
-        AlphaObjectChange(imagesToAnimate, 1f, 0f, 1f);
+        AlphaObjectChange(imagesToAnimate, 1f, 0f, .5f);
     }
 
-    private void StartRouleteScreen()
+
+    private void StartRouletteScreen()
     {
         List<GameObject> objectsToExitTheScreen = new List<GameObject> { logo, comecarButton, comecarButtonEdge };
         List<GameObject> objectsToEnterTheScreen = new List<GameObject> { roulette, arrow };
 
-        float exitTargetX = -1200f;
-        float enterTargetX = 0f;
 
         foreach (var obj in objectsToExitTheScreen)
         {
-            MoveObject(obj, exitTargetX, .7f, LeanTweenType.easeInBack, true);
+            MoveObject(obj, _exitTargetX, .7f, LeanTweenType.easeInBack, true);
         }
 
         foreach (var obj in objectsToEnterTheScreen)
         {
-            MoveObject(obj, enterTargetX, 1f, LeanTweenType.easeOutBack, false, .5f);
+            MoveObject(obj, _enterTargetX, 1f, LeanTweenType.easeOutBack, false, .5f);
         }
 
         List<Graphic> imagesToAnimate = GetGirarButtonImages();
         AlphaObjectChange(imagesToAnimate, 0f, 1f, 2f, 1.5f);
     }
 
-    private void StartEndingScreen()
+    private void StartEndingScreen(Color color, string finalMessage)
     {
-        NotifyObservers(ScreenState.EdningScreen);
+        List<GameObject> objectsToExitTheScreen = new List<GameObject> { roulette, arrow, girarButton };
+        List<GameObject> objectsToEnterTheScreen = new List<GameObject> { logoColor, finalMessagePos };
+        RawImage logoRawImage = logoColor.GetComponent<RawImage>();
+        logoRawImage.color = color;
+        _finalMessage.text = finalMessage;
+
+
+        foreach (var obj in objectsToExitTheScreen)
+        {
+            MoveObject(obj, _exitTargetX, .7f, LeanTweenType.easeInBack, true, 1f);
+        }
+
+        foreach (var obj in objectsToEnterTheScreen)
+        {
+            MoveObject(obj, _enterTargetX, 1f, LeanTweenType.easeOutBack, false, 1.5f);
+        }
     }
 
 
@@ -84,7 +115,6 @@ public class UITween : Subject
         bool callCameraAnchorScript, float delay = 0f)
     {
         RectTransform objTransform = obj.GetComponent<RectTransform>();
-
         LeanTween.moveX(objTransform, targetX, duration)
             .setEase(easeType)
             .setDelay(delay)
@@ -106,5 +136,20 @@ public class UITween : Subject
         RawImage rawImage2 = girarButtonEdge.GetComponent<RawImage>();
 
         return new List<Graphic> { image, rawImage2 };
+    }
+
+    public void OnNotify(Color color, string finalMessage)
+    {
+        StartEndingScreen(color, finalMessage);
+    }
+
+    private void OnEnable()
+    {
+        _rouletteSubject.AddObserver(this);
+    }
+
+    private void OnDisable()
+    {
+        _rouletteSubject.RemoveObserver(this);
     }
 }

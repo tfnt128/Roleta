@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+
 public abstract class Subject : MonoBehaviour
 {
     private List<IObserver> _observers = new List<IObserver>();
@@ -15,8 +16,8 @@ public abstract class Subject : MonoBehaviour
         _observers.Remove(observer);
     }
 
-    protected void NotifyObservers(ScreenState state)
+    protected void NotifyObservers(Color color, string finalMessage)
     {
-        _observers.ForEach((observer) => { observer.OnNotify(state); });
+        _observers.ForEach((observer) => { observer.OnNotify(color, finalMessage); });
     }
 }
