@@ -34,8 +34,8 @@ public class RouletteWheel : Subject
 
     Dictionary<ColorEnum, string> colorStringMapping = new Dictionary<ColorEnum, string>
     {
-        { ColorEnum.Red, "Parabéns, você vai se tornar uma milionário" },
-        { ColorEnum.Green, "Você ganhará um presente de alguem que menos espera" },
+        { ColorEnum.Red, "Parabéns, você vai se tornar um milionário!" },
+        { ColorEnum.Green, "Você ganhará um presente de alguem que menos espera!" },
         { ColorEnum.Yellow, "Em breve, algo surpreendente acontecerá em sua vida, fique atento!" },
         { ColorEnum.Blue, "A cor azul traz tranquilidade, prepare-se para momentos serenos e inspiradores!" }
     };

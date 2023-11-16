@@ -1,8 +1,10 @@
+using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class UITween : MonoBehaviour, IObserver
 {
@@ -11,13 +13,15 @@ public class UITween : MonoBehaviour, IObserver
         comecarButton,
         comecarButtonEdge,
         roulette,
-        arrow,
+        rouletteArrow,
+        restartArrow,
         girarButton,
         girarButtonEdge,
         logoColor,
         finalMessagePos;
 
-    [SerializeField] private TextMeshProUGUI _finalMessage;
+    [SerializeField] private List<string> roulettePhrases;
+    [SerializeField] private TextMeshProUGUI _finalMessage, _rouletteMessage;
 
     [SerializeField] private UnityEvent onRouletteButtonPressed;
 
@@ -28,6 +32,12 @@ public class UITween : MonoBehaviour, IObserver
 
     private void Start()
     {
+        if (roulettePhrases.Count < 4)
+        {
+            Debug.LogError("A lista de frases deve ter pelo menos 4 elementos.");
+            return;
+        }
+
         LeanTween.scale(title, new Vector3(1f, 1f, 1f), 2).setDelay(.5f).setEase(LeanTweenType.easeOutElastic);
 
         RawImage rawImage = logo.GetComponent<RawImage>();
@@ -35,7 +45,6 @@ public class UITween : MonoBehaviour, IObserver
         RawImage rawImage3 = comecarButtonEdge.GetComponent<RawImage>();
 
         List<Graphic> imagesToAnimate = new List<Graphic> { rawImage, image2, rawImage3 };
-
         AlphaObjectChange(imagesToAnimate, 0f, 1f, 2f, 2f);
     }
 
@@ -51,13 +60,29 @@ public class UITween : MonoBehaviour, IObserver
         LeanTween.cancelAll();
         List<Graphic> imagesToAnimate = GetGirarButtonImages();
         AlphaObjectChange(imagesToAnimate, 1f, 0f, .5f);
+
+        int indexRandomPhrase = Random.Range(0, roulettePhrases.Count);
+        string chosenPhrase = roulettePhrases[indexRandomPhrase];
+        _rouletteMessage.text = chosenPhrase;
+
+        List<Graphic> textToAnimate = new List<Graphic> { _rouletteMessage };
+        AlphaObjectChange(textToAnimate, 0f, 1f, 1f, 1f);
     }
 
+    public void ButtonToRestart()
+    {
+        Image restartArrowImage = restartArrow.GetComponent<Image>();
+        RawImage titleImage = title.GetComponent<RawImage>();
+        RawImage logoImage = logoColor.GetComponent<RawImage>();
+        List<Graphic> arrowToAnimate = new List<Graphic> { restartArrowImage, _finalMessage, titleImage, logoImage };
+        AlphaObjectChange(arrowToAnimate, 1f, 0f, 1f);
+        StartCoroutine(RestartScene());
+    }
 
     private void StartRouletteScreen()
     {
         List<GameObject> objectsToExitTheScreen = new List<GameObject> { logo, comecarButton, comecarButtonEdge };
-        List<GameObject> objectsToEnterTheScreen = new List<GameObject> { roulette, arrow };
+        List<GameObject> objectsToEnterTheScreen = new List<GameObject> { roulette, rouletteArrow };
 
 
         foreach (var obj in objectsToExitTheScreen)
@@ -76,11 +101,13 @@ public class UITween : MonoBehaviour, IObserver
 
     private void StartEndingScreen(Color color, string finalMessage)
     {
-        List<GameObject> objectsToExitTheScreen = new List<GameObject> { roulette, arrow, girarButton };
+        List<GameObject> objectsToExitTheScreen = new List<GameObject> { roulette, rouletteArrow, girarButton };
         List<GameObject> objectsToEnterTheScreen = new List<GameObject> { logoColor, finalMessagePos };
         RawImage logoRawImage = logoColor.GetComponent<RawImage>();
         logoRawImage.color = color;
         _finalMessage.text = finalMessage;
+        List<Graphic> textToAnimate = new List<Graphic> { _rouletteMessage };
+        AlphaObjectChange(textToAnimate, 1f, 0f, 1f);
 
 
         foreach (var obj in objectsToExitTheScreen)
@@ -92,8 +119,11 @@ public class UITween : MonoBehaviour, IObserver
         {
             MoveObject(obj, _enterTargetX, 1f, LeanTweenType.easeOutBack, false, 1.5f);
         }
-    }
 
+        Image restartArrowImage = restartArrow.GetComponent<Image>();
+        List<Graphic> arrowToAnimate = new List<Graphic> { restartArrowImage };
+        AlphaObjectChange(arrowToAnimate, 0, 1f, 1f, 2f);
+    }
 
     private void AlphaObjectChange(List<Graphic> imagesToAnimate, float startAlpha, float endAlpha, float duration,
         float delay = 0f)
@@ -136,6 +166,13 @@ public class UITween : MonoBehaviour, IObserver
         RawImage rawImage2 = girarButtonEdge.GetComponent<RawImage>();
 
         return new List<Graphic> { image, rawImage2 };
+    }
+
+    private IEnumerator RestartScene()
+    {
+        yield return new WaitForSeconds(2f);
+
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 
     public void OnNotify(Color color, string finalMessage)
