@@ -76,7 +76,7 @@ public class UITween : MonoBehaviour, IObserver
     {
         // Disable restart button, animate elements, and restart the scene
         restartButton.interactable = false;
-        List<Graphic> arrowToAnimate = GetImagesToAnimate(restartButtonArrow.GetComponent<Image>(), finalMessage, titleRoulette.GetComponent<RawImage>(), logoLastScreen.GetComponent<RawImage>());
+        List<Graphic> arrowToAnimate = GetImagesToAnimate(restartButtonArrow.GetComponent<Image>(), finalMessage, titleRoulette.GetComponent<Image>(), logoLastScreen.GetComponent<RawImage>());
         AlphaObjectChange(arrowToAnimate, 1f, 0f, 1f);
         StartCoroutine(RestartScene());
     }
