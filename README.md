@@ -9,13 +9,21 @@ Na terceira tela, a logo da empresa aparece com a cor correspondente à cor que 
 
 ## Lógica do Código
 
-### Design Pattern Observer
-Foi implementado um design pattern Observer utilizando uma interface `IObserver` e a classe `Subject`. A classe `UITween` atua como o observador, responsável por receber e imprimir os resultados da roleta na tela. Ela também notifica a classe `RouletteWheel` por meio de eventos Unity quando o botão de girar é pressionado.
+### Padrão de Design Observer
+Foi implementado um padrão de design Observer utilizando uma interface `IObserver` e a classe `Subject`. A classe `UITween` atua como o observador, responsável por receber e imprimir os resultados da roleta na tela. Ela também notifica a classe `RouletteWheel` por meio de eventos Unity quando o botão de girar é pressionado.
 
 A classe `RouletteWheel` é o sujeito (Subject) e é responsável pela lógica da roleta, incluindo a detecção da cor e da frase correspondente. Ela notifica a classe `UITween` quando a roleta para de girar, fornecendo os resultados.
 
-### Lógica da roleta
-A classe `RouletteWheel` implementa a lógica da torreta de girar, dividindo a área em setores para determinar a cor. As cores e as frases são mapeadas através de enumerações para maior legibilidade do código.
+### Lógica da Roleta
+A classe `RouletteWheel` implementa a lógica da torreta de girar, dividindo a área em setores para determinar a cor. As cores são escaláveis e modulares, permitindo a fácil adição de novas cores, assim como também a adição de novas partições, caso o cliente queira um circulo com mais de 4 faces. Cada cor possui uma enumeração `ColorEnum`, uma cor associada e uma mensagem.
+
+## Como Adicionar Novas Cores
+Para adicionar novas cores, siga estes passos simples:
+
+1. Vá ao Inspector do objeto `Roulette object` no Unity.
+2. Na seção "Color Mapping", adicione uma nova entrada à lista `colorMappings`.
+3. Escolha uma nova enumeração `ColorEnum`, atribua uma cor e uma mensagem correspondente.
+4. As novas cores agora podem ser utilizadas em uma roleta futura com mais ou diferentes cores.
 
 ## Como Executar o Projeto
 
