@@ -1,80 +1,89 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using Random = UnityEngine.Random;
 
 public class RouletteWheel : Subject
 {
-    public int numberOfColors = 4;
-    public float timeOfRotation;
-    public float numberOfCircleRotations;
+    [Header("Roulette Settings")]
+    [SerializeField] private int numberOfColors = 4;
+    [SerializeField] private float timeOfRotation;
+    [SerializeField] private float numberOfCircleRotations;
+    [SerializeField] private AnimationCurve rotateCurve;
 
-    private const float circle = 360.0f;
-    private float angleOfOneColor;
+    private const float Circle = 360.0f;
+    private float _angleOfOneColor;
+    private float _currentTime;
+    
+    private RectTransform _rouletteRectTransform;
 
-    private float currentTime;
+    public enum ColorEnum { Red, Green, Yellow, Blue, Purple, Orange, Pink, Brown, Cyan, Gray }
 
-    public AnimationCurve rotateCurve;
-    private RectTransform rectTransform;
+    [Header("Color Mapping")]
+    public ColorMapping[] colorMappings;
 
+    [System.Serializable]
+    public class ColorMapping
+    {
+        public ColorEnum colorEnum;
+        public Color color;
+        public string message;
+    }
 
     private void Start()
     {
-        angleOfOneColor = circle / numberOfColors;
-        rectTransform = GetComponent<RectTransform>();
+        _angleOfOneColor = Circle / numberOfColors;
+        _rouletteRectTransform = GetComponent<RectTransform>();
     }
-
-    public enum ColorEnum
-    {
-        Red = 0,
-        Green = 1,
-        Yellow = 2,
-        Blue = 3
-    }
-
-    Dictionary<ColorEnum, string> colorStringMapping = new Dictionary<ColorEnum, string>
-    {
-        { ColorEnum.Red, "Parabéns, você vai se tornar um milionário!" },
-        { ColorEnum.Green, "Você ganhará um presente de alguem que menos espera!" },
-        { ColorEnum.Yellow, "Em breve, algo surpreendente acontecerá em sua vida, fique atento!" },
-        { ColorEnum.Blue, "A cor azul traz tranquilidade, prepare-se para momentos serenos e inspiradores!" }
-    };
-
-    Dictionary<ColorEnum, Color> colorMapping = new Dictionary<ColorEnum, Color>
-    {
-        { ColorEnum.Red, Color.red },
-        { ColorEnum.Green, Color.green },
-        { ColorEnum.Yellow, Color.yellow },
-        { ColorEnum.Blue, Color.blue }
-    };
 
     IEnumerator RotateRoulette()
     {
         float startAngle = transform.eulerAngles.z;
-        currentTime = 0;
+        _currentTime = 0;
         int indexColorRandom = Random.Range(0, numberOfColors);
         ColorEnum colorMap = (ColorEnum)indexColorRandom;
-        Color color = colorMapping[colorMap];
-        string finalMessage = colorStringMapping[colorMap];
+        Color color = GetColorFromMapping(colorMap);
+        string finalMessage = GetMessageFromMapping(colorMap);
 
-
-        float finalAngle = (numberOfCircleRotations * circle) + angleOfOneColor * indexColorRandom - startAngle;
+        float finalAngle = (numberOfCircleRotations * Circle) + _angleOfOneColor * indexColorRandom - startAngle;
 
         var wait = new WaitForEndOfFrame();
-        while (currentTime < timeOfRotation)
+        while (_currentTime < timeOfRotation)
         {
-            currentTime += Time.deltaTime;
+            _currentTime += Time.deltaTime;
 
-            float currentAngle = finalAngle * rotateCurve.Evaluate(currentTime / timeOfRotation);
-            rectTransform.localEulerAngles = new Vector3(0, 0, currentAngle + startAngle);
+            float currentAngle = finalAngle * rotateCurve.Evaluate(_currentTime / timeOfRotation);
+            _rouletteRectTransform.localEulerAngles = new Vector3(0, 0, currentAngle + startAngle);
             yield return wait;
         }
 
         NotifyObservers(color, finalMessage);
     }
 
-    public void rotateNow()
+    public void RotateNow()
     {
         StartCoroutine(RotateRoulette());
+    }
+
+    private Color GetColorFromMapping(ColorEnum colorEnum)
+    {
+        foreach (var mapping in colorMappings)
+        {
+            if (mapping.colorEnum == colorEnum)
+            {
+                return mapping.color;
+            }
+        }
+        return Color.white; 
+    }
+
+    private string GetMessageFromMapping(ColorEnum colorEnum)
+    {
+        foreach (var mapping in colorMappings)
+        {
+            if (mapping.colorEnum == colorEnum)
+            {
+                return mapping.message;
+            }
+        }
+        return string.Empty;
     }
 }

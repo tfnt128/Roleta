@@ -8,170 +8,156 @@ using UnityEngine.SceneManagement;
 
 public class UITween : MonoBehaviour, IObserver
 {
-    [SerializeField] private GameObject title,
-        logo,
-        comecarButton,
-        comecarButtonEdge,
-        roulette,
-        rouletteArrow,
-        restartArrow,
-        girarButton,
-        girarButtonEdge,
-        logoColor,
-        finalMessagePos;
-
+    [SerializeField] private GameObject titleRoulette, logoFirstScreen, startButtonObj, startButtonEdge, rouletteObj, rouletteArrow, restartButtonArrow, spinButtonObj, spinButtonEdge, logoLastScreen, finalMessagePos;
+    [SerializeField] private Button startButton, spinButton, restartButton;
     [SerializeField] private List<string> roulettePhrases;
-    [SerializeField] private TextMeshProUGUI _finalMessage, _rouletteMessage;
-
+    [SerializeField] private TextMeshProUGUI finalMessage, rouletteMessage, buttonSpinTxt;
     [SerializeField] private UnityEvent onRouletteButtonPressed;
+    [SerializeField] private RouletteWheel rouletteSubject;
 
-    [SerializeField] private RouletteWheel _rouletteSubject;
-
-    private float _exitTargetX = -1200f;
-    private float _enterTargetX = 0f;
+    private readonly float _exitTargetX = -1200f;
+    private readonly float _enterTargetX = 0f;
 
     private void Start()
     {
+        DisableButtons();
+
         if (roulettePhrases.Count < 4)
         {
             Debug.LogError("A lista de frases deve ter pelo menos 4 elementos.");
             return;
         }
 
-        LeanTween.scale(title, new Vector3(1f, 1f, 1f), 2).setDelay(.5f).setEase(LeanTweenType.easeOutElastic);
+        LeanTween.scale(titleRoulette, Vector3.one, 2).setDelay(0.5f).setEase(LeanTweenType.easeOutElastic);
 
-        RawImage rawImage = logo.GetComponent<RawImage>();
-        Image image2 = comecarButton.GetComponent<Image>();
-        RawImage rawImage3 = comecarButtonEdge.GetComponent<RawImage>();
-
-        List<Graphic> imagesToAnimate = new List<Graphic> { rawImage, image2, rawImage3 };
-        AlphaObjectChange(imagesToAnimate, 0f, 1f, 2f, 2f);
+        List<Graphic> imagesToAnimate = GetImagesToAnimate(logoFirstScreen.GetComponent<Graphic>(), startButtonObj.GetComponent<Graphic>(), startButtonEdge.GetComponent<Graphic>());
+        AlphaObjectChange(imagesToAnimate, 0f, 1f, 1f, startButton, 2f);
     }
 
     public void ComecarButton()
     {
-        LeanTween.cancelAll();
+        DisableButtons();
         StartRouletteScreen();
     }
 
     public void GirarButton()
     {
+        spinButton.interactable = false;
         onRouletteButtonPressed.Invoke();
-        LeanTween.cancelAll();
+        
         List<Graphic> imagesToAnimate = GetGirarButtonImages();
         AlphaObjectChange(imagesToAnimate, 1f, 0f, .5f);
 
         int indexRandomPhrase = Random.Range(0, roulettePhrases.Count);
         string chosenPhrase = roulettePhrases[indexRandomPhrase];
-        _rouletteMessage.text = chosenPhrase;
+        rouletteMessage.text = chosenPhrase;
 
-        List<Graphic> textToAnimate = new List<Graphic> { _rouletteMessage };
-        AlphaObjectChange(textToAnimate, 0f, 1f, 1f, 1f);
+        List<Graphic> textToAnimate = new List<Graphic> { rouletteMessage };
+        AlphaObjectChange(textToAnimate, 0f, 1f, 1f, null, 1f);
+        
+        List<Graphic> buttonTextToAnimate = new List<Graphic> { buttonSpinTxt};
+        AlphaObjectChange(buttonTextToAnimate, 1f, 0f, 1f, null);
     }
 
     public void ButtonToRestart()
     {
-        Image restartArrowImage = restartArrow.GetComponent<Image>();
-        RawImage titleImage = title.GetComponent<RawImage>();
-        RawImage logoImage = logoColor.GetComponent<RawImage>();
-        List<Graphic> arrowToAnimate = new List<Graphic> { restartArrowImage, _finalMessage, titleImage, logoImage };
+        restartButton.interactable = false;
+        List<Graphic> arrowToAnimate = GetImagesToAnimate(restartButtonArrow.GetComponent<Image>(), finalMessage, titleRoulette.GetComponent<RawImage>(), logoLastScreen.GetComponent<RawImage>());
         AlphaObjectChange(arrowToAnimate, 1f, 0f, 1f);
         StartCoroutine(RestartScene());
     }
 
     private void StartRouletteScreen()
     {
-        List<GameObject> objectsToExitTheScreen = new List<GameObject> { logo, comecarButton, comecarButtonEdge };
-        List<GameObject> objectsToEnterTheScreen = new List<GameObject> { roulette, rouletteArrow };
-
-
-        foreach (var obj in objectsToExitTheScreen)
-        {
-            MoveObject(obj, _exitTargetX, .7f, LeanTweenType.easeInBack, true);
-        }
-
-        foreach (var obj in objectsToEnterTheScreen)
-        {
-            MoveObject(obj, _enterTargetX, 1f, LeanTweenType.easeOutBack, false, .5f);
-        }
+        MoveObjects(new List<GameObject> { logoFirstScreen, startButtonObj, startButtonEdge }, _exitTargetX, 0.7f, LeanTweenType.easeInBack, true);
+        MoveObjects(new List<GameObject> { rouletteObj, rouletteArrow }, _enterTargetX, 1f, LeanTweenType.easeOutBack, false, 0.5f);
 
         List<Graphic> imagesToAnimate = GetGirarButtonImages();
-        AlphaObjectChange(imagesToAnimate, 0f, 1f, 2f, 1.5f);
+        AlphaObjectChange(imagesToAnimate, 0f, 1f, 1f, spinButton, 1.5f);
     }
 
-    private void StartEndingScreen(Color color, string finalMessage)
+    private void StartEndingScreen(Color color, string _finalMessage)
     {
-        List<GameObject> objectsToExitTheScreen = new List<GameObject> { roulette, rouletteArrow, girarButton };
-        List<GameObject> objectsToEnterTheScreen = new List<GameObject> { logoColor, finalMessagePos };
-        RawImage logoRawImage = logoColor.GetComponent<RawImage>();
+        MoveObjects(new List<GameObject> { rouletteObj, rouletteArrow, spinButtonObj }, _exitTargetX, 0.7f, LeanTweenType.easeInBack, true, 1f);
+        MoveObjects(new List<GameObject> { logoLastScreen, finalMessagePos }, _enterTargetX, 1f, LeanTweenType.easeOutBack, false, 1.5f);
+
+        RawImage logoRawImage = logoLastScreen.GetComponent<RawImage>();
         logoRawImage.color = color;
-        _finalMessage.text = finalMessage;
-        List<Graphic> textToAnimate = new List<Graphic> { _rouletteMessage };
-        AlphaObjectChange(textToAnimate, 1f, 0f, 1f);
+        finalMessage.text = _finalMessage;
 
+        List<Graphic> textToAnimate = new List<Graphic> { rouletteMessage };
+        AlphaObjectChange(textToAnimate, 1f, 0f, 1f, null);
 
-        foreach (var obj in objectsToExitTheScreen)
-        {
-            MoveObject(obj, _exitTargetX, .7f, LeanTweenType.easeInBack, true, 1f);
-        }
-
-        foreach (var obj in objectsToEnterTheScreen)
-        {
-            MoveObject(obj, _enterTargetX, 1f, LeanTweenType.easeOutBack, false, 1.5f);
-        }
-
-        Image restartArrowImage = restartArrow.GetComponent<Image>();
-        List<Graphic> arrowToAnimate = new List<Graphic> { restartArrowImage };
-        AlphaObjectChange(arrowToAnimate, 0, 1f, 1f, 2f);
+        List<Graphic> arrowToAnimate = GetImagesToAnimate(restartButtonArrow.GetComponent<Image>());
+        AlphaObjectChange(arrowToAnimate, 0, 1f, 1f, restartButton, 2f);
     }
 
-    private void AlphaObjectChange(List<Graphic> imagesToAnimate, float startAlpha, float endAlpha, float duration,
-        float delay = 0f)
+    private void AlphaObjectChange(List<Graphic> imagesToAnimate, float startAlpha, float endAlpha, float duration, Button hasButton = null, float delay = 0f)
     {
         LeanTween.value(startAlpha, endAlpha, duration)
-            .setOnUpdate((float alpha) =>
-            {
-                foreach (Graphic image in imagesToAnimate)
-                {
-                    Color currentColor = image.color;
-                    currentColor.a = alpha;
-                    image.color = currentColor;
-                }
-            })
-            .setDelay(delay);
+            .setOnUpdate((float alpha) => UpdateAlpha(imagesToAnimate, alpha))
+            .setDelay(delay)
+            .setOnComplete(() => EnableButton(hasButton));
     }
 
-    private void MoveObject(GameObject obj, float targetX, float duration, LeanTweenType easeType,
-        bool callCameraAnchorScript, float delay = 0f)
+    private void UpdateAlpha(List<Graphic> imagesToAnimate, float alpha)
+    {
+        foreach (Graphic image in imagesToAnimate)
+        {
+            Color currentColor = image.color;
+            currentColor.a = alpha;
+            image.color = currentColor;
+        }
+    }
+
+    private void EnableButton(Button button)
+    {
+        if (button != null)
+        {
+            button.interactable = true;
+        }
+    }
+
+    private void MoveObjects(List<GameObject> objects, float targetX, float duration, LeanTweenType easeType, bool callCameraAnchorScript, float delay = 0f)
+    {
+        foreach (var obj in objects)
+        {
+            MoveObject(obj, targetX, duration, easeType, callCameraAnchorScript, delay);
+        }
+    }
+
+    private void MoveObject(GameObject obj, float targetX, float duration, LeanTweenType easeType, bool callCameraAnchorScript, float delay = 0f)
     {
         RectTransform objTransform = obj.GetComponent<RectTransform>();
         LeanTween.moveX(objTransform, targetX, duration)
             .setEase(easeType)
-            .setDelay(delay)
-            .setOnComplete(() => CameraAnchorScriptCall(obj, callCameraAnchorScript));
+            .setDelay(delay);
     }
 
-    private void CameraAnchorScriptCall(GameObject obj, bool enable)
+    private List<Graphic> GetImagesToAnimate(params Graphic[] graphics)
     {
-        CameraAnchor script = obj.GetComponent<CameraAnchor>();
-        if (script != null)
+        List<Graphic> images = new List<Graphic>();
+        foreach (var graphic in graphics)
         {
-            script.enabled = enable ? false : true;
+            if (graphic != null)
+            {
+                images.Add(graphic);
+            }
         }
+        return images;
     }
 
     private List<Graphic> GetGirarButtonImages()
     {
-        Image image = girarButton.GetComponent<Image>();
-        RawImage rawImage2 = girarButtonEdge.GetComponent<RawImage>();
+        Image image = spinButton.GetComponent<Image>();
+        RawImage rawImage2 = spinButtonEdge.GetComponent<RawImage>();
 
-        return new List<Graphic> { image, rawImage2 };
+        return GetImagesToAnimate(image, rawImage2);
     }
 
     private IEnumerator RestartScene()
     {
         yield return new WaitForSeconds(2f);
-
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 
@@ -182,11 +168,18 @@ public class UITween : MonoBehaviour, IObserver
 
     private void OnEnable()
     {
-        _rouletteSubject.AddObserver(this);
+        rouletteSubject.AddObserver(this);
     }
 
     private void OnDisable()
     {
-        _rouletteSubject.RemoveObserver(this);
+        rouletteSubject.RemoveObserver(this);
+    }
+    
+    private void DisableButtons()
+    {
+        startButton.interactable = false;
+        spinButton.interactable = false;
+        restartButton.interactable = false;
     }
 }
