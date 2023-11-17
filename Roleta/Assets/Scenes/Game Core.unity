@@ -289,7 +289,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0.29354858, y: -0.42385864}
+  m_AnchoredPosition: {x: 0.2935791, y: -0.42385864}
   m_SizeDelta: {x: 0.58714, y: 53.90653}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &258348686
@@ -1005,7 +1005,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 842763627}
         m_TargetAssemblyTypeName: UITween, Assembly-CSharp
-        m_MethodName: ComecarButton
+        m_MethodName: StartButton
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -1212,7 +1212,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0.3}
   m_AnchorMax: {x: 1, y: 0.7}
-  m_AnchoredPosition: {x: 0, y: 0.49996948}
+  m_AnchoredPosition: {x: 0, y: 0.49993896}
   m_SizeDelta: {x: -333.7398, y: -276.6413}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1132595185
@@ -1335,7 +1335,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 842763627}
         m_TargetAssemblyTypeName: UITween, Assembly-CSharp
-        m_MethodName: GirarButton
+        m_MethodName: SpinButton
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
