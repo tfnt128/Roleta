@@ -25,9 +25,19 @@ Para adicionar novas cores, siga estes passos simples:
 3. Escolha uma nova enumeração `ColorEnum`, atribua uma cor e uma mensagem correspondente.
 4. As novas cores agora podem ser utilizadas em uma roleta futura com mais ou diferentes cores.
 
-## Como Executar o Projeto
+## Separação das versões
+A versão de `Desktop` e `Mobile` estão seperadas em suas respectivas branches dentro do projeto.
+
+## Como Executar o Projeto por apk ou desktop
+
+1. Clone este repositório.
+2. Entre na pasta `Roleta` e em seguida entre na pasta `build`.
+3. Para executar para windows basta entrar na pasta `desktop` e clicar duas vezes no executor `RoletaDesktop`.
+4. Para executar para mobile basta entrar na pasta `MobileAPK`, baixar e instalar o arquivo apk `Roleta1.0v` por seu dispositivo móvel. 
+
+## Como Executar o Projeto dentro da unity
 
 1. Clone este repositório.
 2. Abra o projeto no Unity.
 3. Certifique-se de ter as dependências necessárias, como o TextMeshPro e o LeanTween, instaladas.
-4. Execute o jogo no Editor Unity ou compile para a plataforma desejada.
+5. Execute o jogo no Editor Unity ou compile para a plataforma desejada.
